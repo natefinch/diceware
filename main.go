@@ -32,19 +32,14 @@ func init() {
 	flag.StringVar(&wordfile, "f", "", "read word list from newline delimited file")
 
 	log.SetFlags(0)
+
+	flag.Usage = usage
 }
 
 func main() {
 	flag.Parse()
 
 	if len(flag.Args()) > 0 {
-		fmt.Printf(`diceware v%s
-
-Diceware generates passphrases using a method that conforms to the algorithm
-stated here: http://world.std.com/~reinhold/diceware.html
-
-`, version)
-
 		flag.Usage()
 		return
 	}
@@ -187,4 +182,28 @@ func moreThanOneTrue(bools ...bool) bool {
 		}
 	}
 	return false
+}
+
+func usage() {
+	fmt.Printf(`diceware v%s
+
+Diceware generates passphrases using a method that conforms to the algorithm
+stated here: http://world.std.com/~reinhold/diceware.html
+
+Usage:
+  diceware [options]
+
+Options:
+  -w <num>	number of words to generate (default 6)
+  -e		generate an extra random character
+
+By default, diceware uses the diceware wordlist shown here:
+http://world.std.com/~reinhold/diceware.wordlist.asc. You may change this by
+specifying at most one of the following flags:
+
+  -8		use diceware 8k word list
+  -b		use alternate word list from Alan Beale
+  -f <file>	read word list from newline delimited file
+  -t <file>	read word list from tsv file ('12345	word' style)
+`, version)
 }

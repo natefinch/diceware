@@ -12,15 +12,23 @@ Run `go get github.com/natefinch/diceware`
 
 ### Usage
 
-	usage of diceware:
-	  -8=false: use diceware 8k word list
-	  -b=false: use alternate word list from Alan Beale
-	  -e=false: generate an extra random character
-	  -f="": read word list from newline delimited file
-	  -t="": read word list from tsv file ('12345	word' style)
-	  -w=6: number of words to generate
+```
+Usage:
+  diceware [options]
 
-The -8, -b, -f, and -t flags cannot be combined.
+Options:
+  -w <num>	number of words to generate (default 6)
+  -e		generate an extra random character
+
+By default, diceware uses the diceware wordlist shown here:
+http://world.std.com/~reinhold/diceware.wordlist.asc. You may change this by
+specifying at most one of the following flags:
+
+  -8		use diceware 8k word list
+  -b		use alternate word list from Alan Beale
+  -f <file>	read word list from newline delimited file
+  -t <file>	read word list from tsv file ('12345	word' style)
+```
 
 ### Examples
 
