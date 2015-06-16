@@ -13,7 +13,9 @@ Run `go get github.com/natefinch/diceware`
 ### Usage
 
 	usage of diceware:
-		-b=false: use alternate word list from Alan Beale
-		-e=false: generate an extra random character
-		-f="": read word list from file (must be tsv)
-		-n=6: number of words to generate
+	  -8=false: use diceware 8k word list
+	  -b=false: use alternate word list from Alan Beale
+	  -e=false: generate an extra random character
+	  -f="": read word list from newline delimited file
+	  -t="": read word list from tsv file ('12345	word' style)
+	  -w=6: number of words to generate
