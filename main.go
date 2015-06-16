@@ -49,6 +49,10 @@ stated here: http://world.std.com/~reinhold/diceware.html
 		return
 	}
 
+	if moreThanOneTrue(beale, dw8k, (tsvfile != ""), (wordfile != "")) {
+		log.Fatalln("Only one of -b, -8, -t, and -f may be specified.")
+	}
+
 	var chosen, rolls []string
 	switch {
 	case wordfile != "":
@@ -170,4 +174,17 @@ func fromWordlist(r io.Reader) (rolls, chosen []string) {
 		chosen[x] = words[i]
 	}
 	return rolls, chosen
+}
+
+func moreThanOneTrue(bools ...bool) bool {
+	found := false
+	for _, b := range bools {
+		if b {
+			if found {
+				return true
+			}
+			found = true
+		}
+	}
+	return false
 }

@@ -20,8 +20,7 @@ Run `go get github.com/natefinch/diceware`
 	  -t="": read word list from tsv file ('12345	word' style)
 	  -w=6: number of words to generate
 
-The -8, -b, -f, and -t flags cannot be combined. If more than one is specified,
-only one takes effect, in this order: -f, -t, -8, -b
+The -8, -b, -f, and -t flags cannot be combined.
 
 ### Examples
 
