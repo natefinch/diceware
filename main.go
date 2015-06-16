@@ -112,6 +112,7 @@ func roll() string {
 func fromTSV(rd io.Reader) (rolls, chosen []string) {
 	r := csv.NewReader(rd)
 	r.Comma = '\t'
+	r.FieldsPerRecord = 2
 
 	words := make(map[string]string, 7776)
 	rec, err := r.Read()
@@ -145,8 +146,13 @@ func fromWordlist(r io.Reader) (rolls, chosen []string) {
 	// guess at a big size
 	words := make([]string, 0, 8192)
 	for scanner.Scan() {
-		words = append(words, scanner.Text())
+		w := scanner.Text()
+		if strings.ContainsRune(w, '\t') {
+			log.Fatalf("tab found in word %q, maybe you meant to use -t?", w)
+		}
+		words = append(words, w)
 	}
+
 	if err := scanner.Err(); err != nil {
 		log.Fatalln(err)
 	}
