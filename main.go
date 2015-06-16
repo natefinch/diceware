@@ -13,6 +13,8 @@ import (
 	"text/tabwriter"
 )
 
+const version = "1.0.0"
+
 var length = 6
 var extra bool
 var beale bool
@@ -31,9 +33,13 @@ func main() {
 	flag.Parse()
 
 	if len(flag.Args()) > 0 {
-		log.Println(`Diceware generates passphrases using a method that conforms to the algorithm
+		log.Printf(`diceware v%s
+			
+Diceware generates passphrases using a method that conforms to the algorithm
 stated here: http://world.std.com/~reinhold/diceware.html
-`)
+
+`, version)
+
 		flag.Usage()
 		return
 	}
