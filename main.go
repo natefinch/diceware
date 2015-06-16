@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/rand"
 	"encoding/csv"
 	"flag"
@@ -18,13 +19,17 @@ const version = "1.0.0"
 var length = 6
 var extra bool
 var beale bool
-var file string
+var dw8k bool
+var tsvfile string
+var wordfile string
 
 func init() {
-	flag.IntVar(&length, "n", 6, "number of words to generate")
+	flag.IntVar(&length, "w", 6, "number of words to generate")
 	flag.BoolVar(&extra, "e", false, "generate an extra random character")
 	flag.BoolVar(&beale, "b", false, "use alternate word list from Alan Beale")
-	flag.StringVar(&file, "f", "", "read word list from file (must be tsv)")
+	flag.BoolVar(&dw8k, "8", false, "use diceware 8k word list")
+	flag.StringVar(&tsvfile, "t", "", "read word list from tsv file ('12345\tword' style)")
+	flag.StringVar(&wordfile, "f", "", "read word list from newline delimited file")
 
 	log.SetFlags(0)
 }
@@ -33,8 +38,8 @@ func main() {
 	flag.Parse()
 
 	if len(flag.Args()) > 0 {
-		log.Printf(`diceware v%s
-			
+		fmt.Printf(`diceware v%s
+
 Diceware generates passphrases using a method that conforms to the algorithm
 stated here: http://world.std.com/~reinhold/diceware.html
 
@@ -44,49 +49,28 @@ stated here: http://world.std.com/~reinhold/diceware.html
 		return
 	}
 
-	if beale && file != "" {
-		log.Fatalln("Flags -b and -f conflict and cannot both be specified.")
-	}
-
-	var r *csv.Reader
+	var chosen, rolls []string
 	switch {
-	case beale:
-		r = csv.NewReader(strings.NewReader(bealeList))
-	case file != "":
-		f, err := os.Open(file)
+	case wordfile != "":
+		f, err := os.Open(wordfile)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		defer f.Close()
-		r = csv.NewReader(f)
+		rolls, chosen = fromWordlist(f)
+	case tsvfile != "":
+		f, err := os.Open(tsvfile)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer f.Close()
+		rolls, chosen = fromTSV(f)
+	case dw8k:
+		rolls, chosen = fromWordlist(strings.NewReader(diceware8k))
+	case beale:
+		rolls, chosen = fromTSV(strings.NewReader(bealeList))
 	default:
-		r = csv.NewReader(strings.NewReader(list))
-	}
-	r.Comma = '\t'
-
-	words := make(map[string]string, 7776)
-	rec, err := r.Read()
-	for err == nil {
-		words[rec[0]] = rec[1]
-		rec, err = r.Read()
-	}
-
-	if err != io.EOF {
-		log.Fatalln(err)
-	}
-
-	if len(words) != 7776 {
-		log.Fatalf("Expected exactly 7776 words in wordlist, but found %d", len(words))
-	}
-
-	rolls := make([]string, length)
-	for x := 0; x < length; x++ {
-		rolls[x] = roll()
-	}
-
-	chosen := make([]string, length)
-	for x, r := range rolls {
-		chosen[x] = words[r]
+		rolls, chosen = fromTSV(strings.NewReader(list))
 	}
 
 	if extra {
@@ -123,4 +107,61 @@ func roll() string {
 		rolls[x] = one + byte(n.Int64())
 	}
 	return string(rolls)
+}
+
+func fromTSV(rd io.Reader) (rolls, chosen []string) {
+	r := csv.NewReader(rd)
+	r.Comma = '\t'
+
+	words := make(map[string]string, 7776)
+	rec, err := r.Read()
+	for err == nil {
+		words[rec[0]] = rec[1]
+		rec, err = r.Read()
+	}
+
+	if err != io.EOF {
+		log.Fatalln(err)
+	}
+
+	if len(words) != 7776 {
+		log.Fatalf("Expected exactly 7776 words in tsv wordlist, but found %d", len(words))
+	}
+
+	rolls = make([]string, length)
+	for x := 0; x < length; x++ {
+		rolls[x] = roll()
+	}
+
+	chosen = make([]string, length)
+	for x, r := range rolls {
+		chosen[x] = words[r]
+	}
+	return rolls, chosen
+}
+
+func fromWordlist(r io.Reader) (rolls, chosen []string) {
+	scanner := bufio.NewScanner(r)
+	// guess at a big size
+	words := make([]string, 0, 8192)
+	for scanner.Scan() {
+		words = append(words, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		log.Fatalln(err)
+	}
+	rolls = make([]string, length)
+	chosen = make([]string, length)
+
+	max := big.NewInt(int64(len(words)))
+	for x := 0; x < length; x++ {
+		n, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		i := n.Int64()
+		rolls[x] = fmt.Sprintf("%d", i)
+		chosen[x] = words[i]
+	}
+	return rolls, chosen
 }
