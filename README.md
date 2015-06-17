@@ -6,6 +6,15 @@ stated here: http://world.std.com/~reinhold/diceware.html
 This program uses Go's cryptographically secure psuedorandom number generator to
 generate the "die rolls" for the algorithm.
 
+## What is a passphrase?
+
+![correcthorse](https://cloud.githubusercontent.com/assets/3185864/8198197/06534c20-1471-11e5-981d-fa407b0c4b7d.png)
+
+A passphrase is a password that is made up of a handful of words. This makes the
+password easy to remember and easy to type, even on a phone. Note that the
+passphrase needs to be longer than a traditional totally random password,
+because the passphrase is made of words not just random garbage.
+
 ### Installation
 
 Run `go get github.com/natefinch/diceware`
